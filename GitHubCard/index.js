@@ -9,34 +9,20 @@ const printGitHubCards = (username, fetchFollowers) => {
   axios
     .get(`https://api.github.com/users/${username}`)
     .then(response => {
-      console.log("First response to given username", response.data);
-
       let cards = $(".cards");
-
       cards.append(githubCard(response.data));
 
       if (fetchFollowers) {
-        let followersTitle = $("<h1></h1>");
-        followersTitle.addClass("followersTitle");
-        followersTitle.text(`${response.data.name}'s Followers`);
-        cards.append(followersTitle);
-
         return { followersList: response.data.followers_url, fetchFollowers };
-      } else {
       }
     })
     .then(response => {
-      if (fetchFollowers) {
-        console.log("response", response);
-
+      if (response.fetchFollowers) {
         axios
           .get(response.followersList)
           .then(res =>
             res.data.forEach(item => {
               printGitHubCards(item.login, false);
-              // console.log("item", item.login);
-              // let cards = $(".cards");
-              // cards.append(githubCard(item));
             })
           )
           .catch(error => console.log("Followers error:", error));
@@ -44,6 +30,8 @@ const printGitHubCards = (username, fetchFollowers) => {
     })
     .catch(error => console.log("Could not append card to the DOM", error));
 };
+
+printGitHubCards(myUsername, true);
 
 /* Step 2: Inspect and study the data coming back, this is YOUR 
    github info! You will need to understand the structure of this 
@@ -151,4 +139,3 @@ const githubCard = object => {
   luishrd
   bigknell
 */
-printGitHubCards(myUsername, true);
