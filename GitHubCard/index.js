@@ -5,34 +5,44 @@
 
 const myUsername = "sametweb";
 
-const printGitHubCards = username => {
+const printGitHubCards = (username, fetchFollowers) => {
   axios
     .get(`https://api.github.com/users/${username}`)
     .then(response => {
-      console.log(response);
+      console.log("First response to given username", response.data);
+
       let cards = $(".cards");
+
       cards.append(githubCard(response.data));
-      return response.data.followers_url;
+
+      if (fetchFollowers) {
+        let followersTitle = $("<h1></h1>");
+        followersTitle.addClass("followersTitle");
+        followersTitle.text(`${response.data.name}'s Followers`);
+        cards.append(followersTitle);
+
+        return { followersList: response.data.followers_url, fetchFollowers };
+      } else {
+      }
     })
     .then(response => {
-      $(".cards").append(
-        $(
-          `<h1 style="font-size: 2rem; margin-bottom: 20px;">${username}'s Followers</h1>`
-        )
-      );
+      if (fetchFollowers) {
+        console.log("response", response);
 
-      axios
-        .get(response)
-        .then(res =>
-          res.data.forEach(item => {
-            let cards = $(".cards");
-            cards.append(githubCard(item));
-          })
-        )
-        .catch(error => console.log("Followers error:", error));
+        axios
+          .get(response.followersList)
+          .then(res =>
+            res.data.forEach(item => {
+              printGitHubCards(item.login, false);
+              // console.log("item", item.login);
+              // let cards = $(".cards");
+              // cards.append(githubCard(item));
+            })
+          )
+          .catch(error => console.log("Followers error:", error));
+      }
     })
-
-    .catch(error => console.log("My Profile Error", error));
+    .catch(error => console.log("Could not append card to the DOM", error));
 };
 
 /* Step 2: Inspect and study the data coming back, this is YOUR 
@@ -98,16 +108,15 @@ const githubCard = object => {
   let bio = $("<p></p>");
 
   img.attr("src", object.avatar_url);
-  !object.name ? img.css({ width: "50px", height: "50px" }) : null;
-  object.name ? name.text(object.name) : null;
+  name.text(object.name);
   username.text(object.login);
-  object.location ? location.text(`Location: ${object.location}`) : null;
+  location.text(`Location: ${object.location}`);
   profile.text("Profile: ");
   profileURL.attr("href", object.html_url);
   profileURL.text(object.html_url);
-  object.followers ? followers.text(`Folowers: ${object.followers}`) : null;
-  object.following ? following.text(`Following: ${object.following}`) : null;
-  object.bio ? bio.text(object.bio) : null;
+  followers.text(`Folowers: ${object.followers}`);
+  following.text(`Following: ${object.following}`);
+  bio.text(object.bio);
 
   // cardInfo.append([
   //   name,
@@ -142,4 +151,4 @@ const githubCard = object => {
   luishrd
   bigknell
 */
-printGitHubCards(myUsername);
+printGitHubCards(myUsername, true);
