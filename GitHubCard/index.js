@@ -25,10 +25,12 @@ const printGitHubCards = (username, fetchFollowers) => {
               printGitHubCards(item.login, false);
             })
           )
-          .catch(error => console.log("Followers error:", error));
+          .catch(error =>
+            console.log("Cannot fetch followers's information:", error)
+          );
       }
     })
-    .catch(error => console.log("Could not append card to the DOM", error));
+    .catch(error => console.log("Cannot fetch user information", error));
 };
 
 printGitHubCards(myUsername, true);
