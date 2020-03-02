@@ -3,6 +3,38 @@
            https://api.github.com/users/<your name>
 */
 
+const myUsername = "sametweb";
+
+const printGitHubCards = (username, fetchFollowers) => {
+  axios
+    .get(`https://api.github.com/users/${username}`)
+    .then(response => {
+      let cards = $(".cards");
+      cards.append(githubCard(response.data));
+
+      if (fetchFollowers) {
+        return { followersList: response.data.followers_url, fetchFollowers };
+      }
+    })
+    .then(response => {
+      if (response.fetchFollowers) {
+        axios
+          .get(response.followersList)
+          .then(res =>
+            res.data.forEach(item => {
+              printGitHubCards(item.login, false);
+            })
+          )
+          .catch(error =>
+            console.log("Cannot fetch followers's information:", error)
+          );
+      }
+    })
+    .catch(error => console.log("Cannot fetch user information", error));
+};
+
+printGitHubCards(myUsername, true);
+
 /* Step 2: Inspect and study the data coming back, this is YOUR 
    github info! You will need to understand the structure of this 
    data in order to use it to build your component function 
@@ -24,7 +56,13 @@
           user, and adding that card to the DOM.
 */
 
-const followersArray = [];
+const followersArray = [
+  "tetondan",
+  "dustinmyers",
+  "justsml",
+  "luishrd",
+  "bigknell"
+];
 
 /* Step 3: Create a function that accepts a single object as its only argument,
           Using DOM methods and properties, create a component that will return the following DOM element:
@@ -45,6 +83,56 @@ const followersArray = [];
 </div>
 
 */
+
+const githubCard = object => {
+  let card = $('<div class="card"></div>');
+  let img = $("<img />");
+  let cardInfo = $('<div class="card-info"></div>');
+  let name = $('<h3 clas="name"></h3>');
+  let username = $('<p class="username"></p>');
+  let location = $("<p></p>");
+  let profile = $("<p></p>");
+  let profileURL = $("<a></a>");
+  let followers = $("<p></p>");
+  let following = $("<p></p>");
+  let bio = $("<p></p>");
+
+  img.attr("src", object.avatar_url);
+  name.text(object.name);
+  username.text(object.login);
+  location.text(`Location: ${object.location}`);
+  profile.text("Profile: ");
+  profileURL.attr("href", object.html_url);
+  profileURL.text(object.html_url);
+  followers.text(`Folowers: ${object.followers}`);
+  following.text(`Following: ${object.following}`);
+  bio.text(object.bio);
+
+  // cardInfo.append([
+  //   name,
+  //   username,
+  //   location,
+  //   profile,
+  //   followers,
+  //   following,
+  //   bio
+  // ]);
+  // profile.append(profileURL);
+  card.append([
+    img,
+    cardInfo.append([
+      name,
+      username,
+      location,
+      profile.append(profileURL),
+      followers,
+      following,
+      bio
+    ])
+  ]);
+
+  return card;
+};
 
 /* List of LS Instructors Github username's: 
   tetondan
